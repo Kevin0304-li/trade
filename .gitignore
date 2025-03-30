@@ -42,4 +42,8 @@ env/
 
 # OS specific files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Vercel
+.vercel
+node_modules/ 
