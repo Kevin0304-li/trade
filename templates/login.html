@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mb-4 animate-on-scroll">
+            <h2 class="fw-bold text-primary">Welcome Back</h2>
+            <p class="text-muted">Sign in to access your dashboard</p>
+        </div>
+        
+        <div class="card animate-on-scroll">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('login') }}" id="login-form">
+                    <div class="mb-4">
+                        <label for="email" class="form-label">Email address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-envelope text-muted"></i>
+                            </span>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="password" class="form-label">Password</label>
+                            <a href="#" class="small text-decoration-none">Forgot Password?</a>
+                        </div>
+                        <div class="input-group password-field-wrapper">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-lock text-muted"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" data-target="#password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="remember">
+                            <label class="form-check-label" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn btn-primary btn-lg" id="login-button">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center">
+                    <p class="mb-0">Don't have an account? <a href="{{ url_for('register') }}" class="text-decoration-none">Register now</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Login form specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        const loginButton = document.getElementById('login-button');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                // Client-side validation
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (!email || !password) {
+                    e.preventDefault();
+                    showNotification('Please fill in all fields', 'warning');
+                    return;
+                }
+                
+                // Show loading state
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Logging in...';
+                loginButton.disabled = true;
+                
+                // Form will submit normally
+            });
+        }
+    });
+</script>
+{% endblock %} 

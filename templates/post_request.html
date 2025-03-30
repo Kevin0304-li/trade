@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Post a Request - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Post a Request</li>
+            </ol>
+        </nav>
+        
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>Post a New Request
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Template selector -->
+                <div class="mb-4">
+                    <label class="form-label">Choose a Template (Optional)</label>
+                    <select class="form-select" id="template-selector">
+                        <option value="">-- Select a template --</option>
+                        <option value="service">Service Request</option>
+                        <option value="product">Product Purchase</option>
+                        <option value="project">Project Development</option>
+                        <option value="consultation">Consultation/Advice</option>
+                        <option value="custom">Custom Request</option>
+                    </select>
+                    <div class="form-text">Choose a template to get started quickly with pre-formatted content.</div>
+                </div>
+                
+                <form method="POST" action="{{ url_for('post_request') }}" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required
+                            placeholder="E.g., 'Need a website design', 'Looking for a study plan'">
+                        <div class="form-text">Be specific and concise about what you need.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="company_name" class="form-label">Company Name (Optional)</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" 
+                            placeholder="Enter your company or organization name">
+                        <div class="form-text">This helps sellers understand who they'll be working with.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="6" required
+                            placeholder="Describe what you need in detail. Be specific about your requirements, timeline, and any other relevant information."></textarea>
+                        <div class="form-text">The more details you provide, the better offers you'll receive.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="budget" class="form-label">Budget ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-dollar-sign text-muted"></i>
+                            </span>
+                            <input type="number" class="form-control" id="budget" name="budget" step="0.01" min="1" required
+                                placeholder="Enter your maximum budget">
+                        </div>
+                        <div class="form-text">Set a reasonable budget to attract quality offers.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="files" class="form-label">Upload Files (Optional)</label>
+                        <input type="file" class="form-control" id="files" name="files" multiple 
+                               accept=".pdf,.png,.jpg,.jpeg,.gif">
+                        <div class="form-text">
+                            Upload PDFs, images, or other relevant files. Maximum size: 16MB.
+                            <br>Accepted formats: PDF, PNG, JPG, JPEG, GIF.
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Post Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="alert alert-info mb-0">
+                    <h5 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Tips for a successful request:</h5>
+                    <ul class="mb-0 ps-3">
+                        <li><strong>Be specific</strong> - Clearly describe what you need</li>
+                        <li><strong>Set a reasonable budget</strong> - Research fair market rates</li>
+                        <li><strong>Include deadlines</strong> - When do you need this completed?</li>
+                        <li><strong>Specify deliverables</strong> - What format do you expect to receive?</li>
+                        <li><strong>Upload examples or specifications</strong> - Visual references help a lot</li>
+                        <li><strong>Respond quickly</strong> - Stay active to receive the best offers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Example Requests Section -->
+        <div class="card mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-eye me-2 text-primary"></i>Example Requests</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item p-3">
+                        <span class="badge bg-primary mb-1">Service</span>
+                        <h6 class="mb-1">Website Design for Small Business</h6>
+                        <p class="mb-1 small">I need a 5-page responsive website for my consulting business. Should include home, about, services, portfolio, and contact pages. Budget: $600.</p>
+                    </div>
+                    <div class="list-group-item p-3">
+                        <span class="badge bg-info mb-1">Product</span>
+                        <h6 class="mb-1">Looking for 10 Office Chairs</h6>
+                        <p class="mb-1 small">Need 10 ergonomic office chairs for our startup. Must have adjustable height, armrests, and lumbar support. Prefer black or navy blue. Budget: $150 per chair.</p>
+                    </div>
+                    <div class="list-group-item p-3">
+                        <span class="badge bg-success mb-1">Project</span>
+                        <h6 class="mb-1">Mobile App Development - Fitness Tracker</h6>
+                        <p class="mb-1 small">Looking for a developer to create a fitness tracking app for iOS and Android. Features include workout logging, progress tracking, and social sharing. Budget: $5,000.</p>
+                    </div>
+                    <div class="list-group-item p-3">
+                        <span class="badge bg-warning mb-1">Consultation</span>
+                        <h6 class="mb-1">Marketing Strategy Consultation</h6>
+                        <p class="mb-1 small">Need expert advice on digital marketing strategy for our e-commerce store. Looking for 3-hour consultation with written recommendations. Budget: $300.</p>
+                    </div>
+                    <div class="list-group-item p-3">
+                        <span class="badge bg-secondary mb-1">Education</span>
+                        <h6 class="mb-1">Math Tutoring for Calculus</h6>
+                        <p class="mb-1 small">Need help with college calculus for 2 hours per week. Topics include derivatives and integrals. Prefer someone with teaching experience. Budget: $30/hour.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateSelector = document.getElementById('template-selector');
+    const titleInput = document.getElementById('title');
+    const descriptionTextarea = document.getElementById('description');
+    const budgetInput = document.getElementById('budget');
+    
+    // Template definitions
+    const templates = {
+        service: {
+            title: "Need a Professional for [Service Type]",
+            description: "I am looking for a qualified professional to provide the following service:\n\nService Details:\n- [Describe specific service requirements]\n- [Include any special requirements or qualifications needed]\n\nTimeline:\n- Start date: [When do you need this to start?]\n- Completion: [When does this need to be finished?]\n\nAdditional Information:\n- [Any other relevant details that would help providers understand your needs]\n\nPlease include in your offer:\n1. Your relevant experience\n2. Estimated timeline\n3. What's included in your quoted price",
+            budget: ""
+        },
+        product: {
+            title: "Looking to Purchase [Product Type]",
+            description: "I want to purchase the following product:\n\nProduct Requirements:\n- [Describe product specifications]\n- [Include any brand preferences or requirements]\n- [Mention quantity needed]\n\nDelivery Information:\n- Timeframe: [When do you need this delivered?]\n- Location: [General location information if relevant]\n\nAdditional Information:\n- [Any other details sellers should know]\n\nPlease include in your offer:\n1. Product specifications\n2. Delivery timeframe\n3. Warranty or guarantee information\n4. Any additional costs (shipping, taxes, etc.)",
+            budget: ""
+        },
+        project: {
+            title: "Project: [Project Title]",
+            description: "I'm seeking someone to complete the following project:\n\nProject Overview:\n- [Brief description of the project]\n\nRequirements:\n- [List key requirements]\n- [Include technical specifications if applicable]\n- [Mention any specific tools or technologies required]\n\nDeliverables:\n- [List expected deliverables]\n- [Include file formats if applicable]\n\nTimeline:\n- [Project start date]\n- [Key milestones if applicable]\n- [Completion deadline]\n\nPlease include in your offer:\n1. Your relevant experience with similar projects\n2. Proposed approach\n3. Detailed timeline\n4. What's included in your quoted price",
+            budget: ""
+        },
+        consultation: {
+            title: "Need Consultation on [Topic]",
+            description: "I'm looking for expert advice on the following topic:\n\nConsultation Needs:\n- [Describe what you need advice about]\n- [Include specific questions you want answered]\n- [Mention your current knowledge level]\n\nSession Format:\n- [Preferred format: written report, video call, phone call, etc.]\n- [Duration/extent of consultation needed]\n\nBackground Information:\n- [Provide relevant background details]\n\nPlease include in your offer:\n1. Your relevant expertise and credentials\n2. Proposed consultation format\n3. How you will deliver your advice\n4. Any follow-up support included",
+            budget: ""
+        },
+        custom: {
+            title: "Custom Request: [Brief Description]",
+            description: "I'm looking for:\n\nRequest Details:\n- [Describe what you need]\n- [Include any specific requirements]\n\nTimeline:\n- [When do you need this completed?]\n\nAdditional Information:\n- [Any other details that would help providers understand your needs]\n\nPlease include in your offer:\n1. Your approach to fulfilling this request\n2. Estimated timeline\n3. What's included in your quoted price",
+            budget: ""
+        }
+    };
+    
+    // Handle template selection
+    templateSelector.addEventListener('change', function() {
+        const selectedTemplate = this.value;
+        
+        if (selectedTemplate && templates[selectedTemplate]) {
+            // Confirm before overwriting existing content
+            if ((titleInput.value || descriptionTextarea.value) && 
+                !confirm("This will replace your current content with the template. Continue?")) {
+                this.value = "";
+                return;
+            }
+            
+            // Apply template
+            titleInput.value = templates[selectedTemplate].title;
+            descriptionTextarea.value = templates[selectedTemplate].description;
+            
+            if (templates[selectedTemplate].budget) {
+                budgetInput.value = templates[selectedTemplate].budget;
+            }
+            
+            // Show notification
+            showNotification('Template applied successfully', 'success');
+        }
+    });
+});
+</script>
+{% endblock %} 

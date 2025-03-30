@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="text-center mb-4 animate-on-scroll">
+            <h2 class="fw-bold text-primary">Create Your Account</h2>
+            <p class="text-muted">Join our community and start posting requests or offering your services</p>
+        </div>
+        
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{% if category == 'error' %}danger{% elif category == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show animate-on-scroll" role="alert">
+                        {% if category == 'error' %}<i class="fas fa-exclamation-circle me-2"></i>{% else %}<i class="fas fa-check-circle me-2"></i>{% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card animate-on-scroll">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('register') }}" id="register-form">
+                    <div class="mb-4 animate-slide-up" style="animation-delay: 0.1s;">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-user text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
+                        </div>
+                        <div class="form-text" id="username-feedback"></div>
+                    </div>
+                    <div class="mb-4 animate-slide-up" style="animation-delay: 0.2s;">
+                        <label for="email" class="form-label">Email address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-envelope text-muted"></i>
+                            </span>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        </div>
+                        <div class="form-text">We'll never share your email with anyone else.</div>
+                    </div>
+                    <div class="mb-4 animate-slide-up" style="animation-delay: 0.3s;">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group password-field-wrapper">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-lock text-muted"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+                            <button type="button" class="password-toggle" data-target="#password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength-container mt-2">
+                            <div class="password-strength-meter" id="password-strength"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="form-text" id="password-feedback">Password strength</span>
+                            <span class="form-text">Use at least 8 characters with letters and numbers.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 animate-slide-up" style="animation-delay: 0.4s;">
+                        <label class="form-label">I want to join as:</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <div class="card h-100 user-type-card border-primary">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="user_type" id="buyer" value="buyer" checked>
+                                            <label class="form-check-label w-100" for="buyer">
+                                                <div class="text-center mb-3 mt-2">
+                                                    <i class="fas fa-search-dollar fa-3x text-primary"></i>
+                                                </div>
+                                                <h5 class="text-center">Buyer</h5>
+                                                <p class="small text-muted">I want to post requests and receive offers from sellers.</p>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 user-type-card">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="user_type" id="seller" value="seller">
+                                            <label class="form-check-label w-100" for="seller">
+                                                <div class="text-center mb-3 mt-2">
+                                                    <i class="fas fa-hand-holding-usd fa-3x text-success"></i>
+                                                </div>
+                                                <h5 class="text-center">Seller</h5>
+                                                <p class="small text-muted">I want to browse requests and offer my services.</p>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mb-4 animate-slide-up" style="animation-delay: 0.5s;">
+                        <button type="submit" class="btn btn-primary btn-lg" id="register-button">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center animate-slide-up" style="animation-delay: 0.6s;">
+                    <p class="mb-0">Already have an account? <a href="{{ url_for('login') }}" class="text-decoration-none">Log in</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Register form specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('register-form');
+        const registerButton = document.getElementById('register-button');
+        
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                // Client-side validation
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (!username || !email || !password) {
+                    e.preventDefault();
+                    showNotification('Please fill in all fields', 'warning');
+                    return;
+                }
+                
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    e.preventDefault();
+                    showNotification('Please enter a valid email address', 'warning');
+                    return;
+                }
+                
+                // Validate password strength
+                const passwordStrength = calculatePasswordStrength(password);
+                if (passwordStrength.score < 2) {
+                    e.preventDefault();
+                    showNotification('Please use a stronger password', 'warning');
+                    return;
+                }
+                
+                // Show loading state
+                registerButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating account...';
+                registerButton.disabled = true;
+                
+                // Form will submit normally
+            });
+            
+            // Username validation
+            const usernameInput = document.getElementById('username');
+            const usernameFeedback = document.getElementById('username-feedback');
+            let usernameTimeout;
+            
+            usernameInput.addEventListener('input', function() {
+                const username = this.value.trim();
+                
+                // Clear any existing timeout
+                clearTimeout(usernameTimeout);
+                
+                // Reset validation state during typing
+                this.classList.remove('is-invalid', 'is-valid');
+                usernameFeedback.textContent = '';
+                
+                // Set a timeout to prevent rapid API calls while typing
+                usernameTimeout = setTimeout(() => {
+                    if (username.length > 0) {
+                        // Check if username is an email format
+                        if (username.includes('@')) {
+                            usernameFeedback.textContent = 'Username should not be an email address';
+                            usernameFeedback.classList.remove('text-success');
+                            usernameFeedback.classList.add('text-danger');
+                            this.classList.add('is-invalid');
+                            return;
+                        }
+                        
+                        // Check username format (alphanumeric with underscores allowed)
+                        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+                        if (!usernameRegex.test(username)) {
+                            usernameFeedback.textContent = 'Username can only contain letters, numbers, and underscores';
+                            usernameFeedback.classList.remove('text-success');
+                            usernameFeedback.classList.add('text-danger');
+                            this.classList.add('is-invalid');
+                            return;
+                        }
+                        
+                        // Show loading indicator
+                        usernameFeedback.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Checking availability...';
+                        usernameFeedback.classList.remove('text-danger', 'text-success');
+                        
+                        // Check username availability on server
+                        const formData = new FormData();
+                        formData.append('username', username);
+                        
+                        fetch('/check-username', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.valid) {
+                                usernameFeedback.innerHTML = '<i class="fas fa-check-circle me-1"></i>' + data.message;
+                                usernameFeedback.classList.remove('text-danger');
+                                usernameFeedback.classList.add('text-success');
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                            } else {
+                                usernameFeedback.innerHTML = '<i class="fas fa-times-circle me-1"></i>' + data.message;
+                                usernameFeedback.classList.remove('text-success');
+                                usernameFeedback.classList.add('text-danger');
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                            }
+                        })
+                        .catch(error => {
+                            usernameFeedback.textContent = 'Error checking username';
+                            usernameFeedback.classList.add('text-danger');
+                        });
+                    }
+                }, 500); // 500ms delay to reduce API calls while typing
+            });
+            
+            // Add visual feedback when selecting user type
+            const userTypeBuyer = document.getElementById('buyer');
+            const userTypeSeller = document.getElementById('seller');
+            const buyerCard = userTypeBuyer.closest('.user-type-card');
+            const sellerCard = userTypeSeller.closest('.user-type-card');
+            
+            userTypeBuyer.addEventListener('change', function() {
+                if (this.checked) {
+                    buyerCard.classList.add('border-primary');
+                    sellerCard.classList.remove('border-primary');
+                    
+                    // Animation effect
+                    buyerCard.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        buyerCard.classList.remove('animate-pulse');
+                    }, 500);
+                }
+            });
+            
+            userTypeSeller.addEventListener('change', function() {
+                if (this.checked) {
+                    sellerCard.classList.add('border-primary');
+                    buyerCard.classList.remove('border-primary');
+                    
+                    // Animation effect
+                    sellerCard.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        sellerCard.classList.remove('animate-pulse');
+                    }, 500);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .user-type-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .user-type-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .user-type-card.border-primary {
+        border: 2px solid var(--primary);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .animate-pulse {
+        animation: pulse 0.5s ease;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %} 

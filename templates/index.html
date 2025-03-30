@@ -1,0 +1,592 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section animate-on-scroll">
+    <div class="hero-background"></div>
+    <div class="container position-relative">
+        <h1 class="display-3 fw-bold text-white text-shadow fade-in-up" style="animation-delay: 0.2s">Welcome to Reverse Marketplace</h1>
+        <p class="lead fw-medium text-white text-shadow fade-in-up" style="animation-delay: 0.4s; font-size: 1.5rem;">The platform where buyers post what they need, and sellers compete with their best offers.</p>
+        {% if not current_user.is_authenticated %}
+            <div class="d-flex justify-content-center gap-4 fade-in-up" style="animation-delay: 0.6s">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg pulse-animation">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg glow-on-hover">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card h-100 dashboard-card animate-on-scroll tilt-effect user-type-card">
+            <div class="card-body text-center">
+                <div class="mb-4 icon-bounce">
+                    <i class="fas fa-search-dollar fa-4x text-primary"></i>
+                </div>
+                <h3 class="card-title">I'm a Buyer</h3>
+                <p class="card-text">Post your requests and receive competitive offers from skilled sellers. Set your budget and choose the best match.</p>
+                {% if current_user.is_authenticated and current_user.user_type == 'buyer' %}
+                    <div class="mt-auto pt-3">
+                        <a href="{{ url_for('post_request') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i>Post a Request
+                        </a>
+                    </div>
+                {% elif not current_user.is_authenticated %}
+                    <div class="mt-auto pt-3">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register as Buyer
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 dashboard-card animate-on-scroll tilt-effect user-type-card" style="animation-delay: 0.2s">
+            <div class="card-body text-center">
+                <div class="mb-4 icon-bounce">
+                    <i class="fas fa-hand-holding-usd fa-4x text-success"></i>
+                </div>
+                <h3 class="card-title">I'm a Seller</h3>
+                <p class="card-text">Browse open requests and send your offers to potential buyers. Showcase your skills and win projects.</p>
+                {% if current_user.is_authenticated and current_user.user_type == 'seller' %}
+                    <div class="mt-auto pt-3">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-list-alt me-2"></i>View Requests
+                        </a>
+                    </div>
+                {% elif not current_user.is_authenticated %}
+                    <div class="mt-auto pt-3">
+                        <a href="{{ url_for('register') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register as Seller
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <h2 class="text-center mb-4 animate-on-scroll fade-in">How It Works</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 text-center animate-on-scroll slide-in-left interactive-highlight" style="animation-delay: 0.1s">
+                    <div class="card-body step-card">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-4 step-icon" style="width: 80px; height: 80px;">
+                            <i class="fas fa-edit fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">1. Post a Request</h5>
+                        <p class="card-text text-muted">Buyers describe what they need and set a budget that works for them.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 text-center animate-on-scroll slide-in-up interactive-highlight" style="animation-delay: 0.3s">
+                    <div class="card-body step-card">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-4 step-icon" style="width: 80px; height: 80px;">
+                            <i class="fas fa-comments-dollar fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">2. Receive Offers</h5>
+                        <p class="card-text text-muted">Sellers compete by sending their best offers tailored to your needs.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 text-center animate-on-scroll slide-in-right interactive-highlight" style="animation-delay: 0.5s">
+                    <div class="card-body step-card">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-4 step-icon" style="width: 80px; height: 80px;">
+                            <i class="fas fa-check-circle fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">3. Accept & Complete</h5>
+                        <p class="card-text text-muted">Buyers choose the best offer and the work begins. Simple and efficient.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0 animate-on-scroll fade-in">Example Requests</h2>
+            {% if current_user.is_authenticated and current_user.user_type == 'buyer' %}
+                <a href="{{ url_for('post_request') }}" class="btn btn-primary animate-on-scroll fade-in" style="animation-delay: 0.2s">
+                    <i class="fas fa-plus-circle me-2"></i>Post Your Request
+                </a>
+            {% endif %}
+        </div>
+        
+        <!-- Filter controls -->
+        <div class="filter-controls mb-4 animate-on-scroll fade-in" style="animation-delay: 0.3s">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="me-3">
+                    <label class="form-label mb-0 me-2"><i class="fas fa-filter me-1"></i>Filter by:</label>
+                </div>
+                <div class="btn-group filter-buttons" role="group">
+                    <button type="button" class="btn btn-outline-primary active filter-btn" data-filter="all">All</button>
+                    <button type="button" class="btn btn-outline-primary filter-btn" data-filter="study">Study</button>
+                    <button type="button" class="btn btn-outline-primary filter-btn" data-filter="creative">Creative</button>
+                    <button type="button" class="btn btn-outline-primary filter-btn" data-filter="business">Business</button>
+                </div>
+                <div class="ms-auto">
+                    <select class="form-select form-select-sm" id="price-sort">
+                        <option value="default">Sort by</option>
+                        <option value="low">Price: Low to High</option>
+                        <option value="high">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="example-requests">
+    <div class="col-md-4 mb-4 example-card" data-category="study" data-price="15">
+        <div class="card h-100 animate-on-scroll fade-in request-card tilt-effect" style="animation-delay: 0.1s">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-success">Open</span>
+                    <span class="text-muted"><i class="fas fa-dollar-sign me-1"></i>15</span>
+                </div>
+                <h5 class="card-title">Study Plan for Exams</h5>
+                <p class="card-text">Looking for a comprehensive study plan for my final exams in mathematics and physics. Need strategies to efficiently cover all topics in 2 weeks.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted"><i class="far fa-clock me-1"></i>Posted recently</small>
+                    <a href="#" class="btn btn-sm btn-outline-primary view-details-btn">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4 example-card" data-category="creative" data-price="5">
+        <div class="card h-100 animate-on-scroll fade-in request-card tilt-effect" style="animation-delay: 0.2s">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-success">Open</span>
+                    <span class="text-muted"><i class="fas fa-dollar-sign me-1"></i>5</span>
+                </div>
+                <h5 class="card-title">Birthday Poem</h5>
+                <p class="card-text">Need a creative and personalized birthday poem for my girlfriend who loves hiking and dogs. Something heartfelt that captures our 3-year relationship.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted"><i class="far fa-clock me-1"></i>Posted recently</small>
+                    <a href="#" class="btn btn-sm btn-outline-primary view-details-btn">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4 example-card" data-category="business" data-price="10">
+        <div class="card h-100 animate-on-scroll fade-in request-card tilt-effect" style="animation-delay: 0.3s">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-success">Open</span>
+                    <span class="text-muted"><i class="fas fa-dollar-sign me-1"></i>10</span>
+                </div>
+                <h5 class="card-title">AI Resume Summary</h5>
+                <p class="card-text">Looking for someone to create a compelling AI-optimized summary for my resume. I'm a marketing professional with 5 years of experience seeking new opportunities.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted"><i class="far fa-clock me-1"></i>Posted recently</small>
+                    <a href="#" class="btn btn-sm btn-outline-primary view-details-btn">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="row mt-5 mb-5">
+    <div class="col-md-12">
+        <h2 class="text-center mb-4 animate-on-scroll">What Our Users Say</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 animate-on-scroll flip-card" style="animation-delay: 0.1s">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-body testimonial-card text-center">
+                                <div class="testimonial-img mb-3">
+                                    <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="User" class="rounded-circle" width="80">
+                                </div>
+                                <div class="testimonial-content">
+                                    <p class="card-text">"I got multiple high-quality offers within hours of posting my request. The reverse marketplace concept really works!"</p>
+                                    <div class="mt-3 mb-2">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title mb-0">Sarah J.</h5>
+                                    <small class="text-muted">Buyer</small>
+                                </div>
+                                <button class="btn btn-sm btn-light mt-3 flip-trigger">
+                                    <i class="fas fa-info-circle me-1"></i>See Story
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title mb-3">Sarah's Success Story</h5>
+                                    <p class="card-text">"As a small business owner, I needed a logo designed quickly. I posted my request with a modest budget and within 24 hours had 15 different offers from talented designers. The quality far exceeded what I expected for the price, and I was able to find the perfect match for my brand vision."</p>
+                                </div>
+                                <button class="btn btn-sm btn-light mt-3 flip-trigger">
+                                    <i class="fas fa-arrow-left me-1"></i>Back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 animate-on-scroll flip-card" style="animation-delay: 0.2s">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-body testimonial-card text-center">
+                                <div class="testimonial-img mb-3">
+                                    <img src="https://randomuser.me/api/portraits/men/41.jpg" alt="User" class="rounded-circle" width="80">
+                                </div>
+                                <div class="testimonial-content">
+                                    <p class="card-text">"As a freelance writer, this platform has connected me with clients I would never have found otherwise. Great experience!"</p>
+                                    <div class="mt-3 mb-2">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title mb-0">Michael R.</h5>
+                                    <small class="text-muted">Seller</small>
+                                </div>
+                                <button class="btn btn-sm btn-light mt-3 flip-trigger">
+                                    <i class="fas fa-info-circle me-1"></i>See Story
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title mb-3">Michael's Success Story</h5>
+                                    <p class="card-text">"I joined as a seller after struggling to find consistent writing gigs. Within my first month, I secured three long-term clients by offering competitive rates and quick turnarounds. The platform's simplicity lets me focus on what I do best - writing great content - instead of spending hours marketing myself."</p>
+                                </div>
+                                <button class="btn btn-sm btn-light mt-3 flip-trigger">
+                                    <i class="fas fa-arrow-left me-1"></i>Back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 animate-on-scroll flip-card" style="animation-delay: 0.3s">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-body testimonial-card text-center">
+                                <div class="testimonial-img mb-3">
+                                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User" class="rounded-circle" width="80">
+                                </div>
+                                <div class="testimonial-content">
+                                    <p class="card-text">"The competitive nature of this marketplace means I get the best value for my projects every single time. Highly recommended!"</p>
+                                    <div class="mt-3 mb-2">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title mb-0">Lisa T.</h5>
+                                    <small class="text-muted">Buyer</small>
+                                </div>
+                                <button class="btn btn-sm btn-light mt-3 flip-trigger">
+                                    <i class="fas fa-info-circle me-1"></i>See Story
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title mb-3">Lisa's Success Story</h5>
+                                    <p class="card-text">"I needed to revamp my entire website but had a limited budget. By posting my request here, I was able to compare different proposals and found an amazing developer who not only stayed within my budget but delivered outstanding work. The platform's competitive nature really benefits buyers like me!"</p>
+                                </div>
+                                <button class="btn btn-sm btn-light mt-3 flip-trigger">
+                                    <i class="fas fa-arrow-left me-1"></i>Back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Custom script for the homepage
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle category filtering
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const priceSort = document.getElementById('price-sort');
+        const exampleCards = document.querySelectorAll('.example-card');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                
+                // Filter cards
+                exampleCards.forEach(card => {
+                    if (filter === 'all' || card.dataset.category === filter) {
+                        card.style.display = '';
+                        // Add animation to cards that are shown
+                        const requestCard = card.querySelector('.request-card');
+                        requestCard.classList.add('animate-pulse');
+                        setTimeout(() => {
+                            requestCard.classList.remove('animate-pulse');
+                        }, 500);
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Show notification
+                showNotification(`Showing ${filter === 'all' ? 'all' : filter} requests`, 'info', 1500);
+            });
+        });
+        
+        // Handle price sorting
+        if (priceSort) {
+            priceSort.addEventListener('change', function() {
+                const sortVal = this.value;
+                const container = document.getElementById('example-requests');
+                const cards = Array.from(container.querySelectorAll('.example-card'));
+                
+                // Sort the cards based on price
+                cards.sort((a, b) => {
+                    const priceA = parseInt(a.dataset.price);
+                    const priceB = parseInt(b.dataset.price);
+                    
+                    if (sortVal === 'low') {
+                        return priceA - priceB;
+                    } else if (sortVal === 'high') {
+                        return priceB - priceA;
+                    }
+                    return 0;
+                });
+                
+                // Re-append the sorted cards
+                cards.forEach(card => {
+                    container.appendChild(card);
+                    // Add animation to sorted cards
+                    const requestCard = card.querySelector('.request-card');
+                    requestCard.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        requestCard.classList.remove('animate-pulse');
+                    }, 500);
+                });
+                
+                // Show notification
+                if (sortVal !== 'default') {
+                    const sortText = this.options[this.selectedIndex].text;
+                    showNotification(`Sorted by ${sortText}`, 'info', 1500);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Hero section styling */
+    .hero-section {
+        position: relative;
+        background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+        color: white;
+        padding: 120px 0;
+        text-align: center;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+        overflow: hidden;
+    }
+    
+    .hero-background:before, 
+    .hero-background:after {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .hero-background:before {
+        top: -100px;
+        right: -100px;
+        animation: floatAnimation 8s linear infinite alternate;
+    }
+    
+    .hero-background:after {
+        bottom: -100px;
+        left: -100px;
+        animation: floatAnimation 10s linear infinite alternate-reverse;
+    }
+    
+    @keyframes floatAnimation {
+        0% {
+            transform: rotate(0deg) translate(0, 0) scale(1);
+        }
+        100% {
+            transform: rotate(360deg) translate(50px, 50px) scale(1.2);
+        }
+    }
+    
+    .text-shadow {
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .hero-section h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        letter-spacing: -0.5px;
+    }
+    
+    .hero-section .lead {
+        font-size: 1.5rem;
+        margin-bottom: 40px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+    
+    /* Button animations */
+    .pulse-animation {
+        animation: pulse 2s infinite;
+        box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0.7);
+        transform: scale(1);
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0.7);
+        }
+        70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 15px rgba(var(--bs-primary-rgb), 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0);
+        }
+    }
+    
+    .glow-on-hover {
+        border: 2px solid white;
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+    
+    .glow-on-hover:after {
+        content: "";
+        background: white;
+        position: absolute;
+        z-index: -1;
+        left: -20%;
+        right: -20%;
+        top: 0;
+        bottom: 0;
+        transform: skewX(-45deg) scale(0, 1);
+        transition: all 0.5s;
+    }
+    
+    .glow-on-hover:hover {
+        color: var(--bs-primary);
+        background: white;
+    }
+    
+    .glow-on-hover:hover:after {
+        transform: skewX(-45deg) scale(1, 1);
+        transition: all 0.5s;
+    }
+    
+    /* User type card styling */
+    .user-type-card {
+        border: none;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .user-type-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .icon-bounce {
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-20px);}
+        60% {transform: translateY(-10px);}
+    }
+    
+    /* How it works section */
+    .step-card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .step-card:hover .step-icon {
+        transform: scale(1.1);
+    }
+    
+    .step-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    /* Testimonial card styling */
+    .testimonial-card {
+        position: relative;
+    }
+    
+    .testimonial-img {
+        position: relative;
+    }
+    
+    .testimonial-img img {
+        border: 3px solid var(--primary);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %} 

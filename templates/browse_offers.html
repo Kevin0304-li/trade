@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Offers for {{ request.title }} - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4 animate-on-scroll">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('view_request', request_id=request.id) }}">Request Details</a></li>
+        <li class="breadcrumb-item active">Browse Offers</li>
+    </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card animate-on-scroll">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-comment-dollar me-2"></i>Offers for Request #{{ request.id }}</h3>
+                <span class="badge 
+                    {% if request.status == 'open' %}bg-success
+                    {% elif request.status == 'assigned' %}bg-warning
+                    {% else %}bg-secondary{% endif %}">
+                    {{ request.status|capitalize }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-4">
+                    <div>
+                        <h4>{{ request.title }}</h4>
+                        <p class="text-muted">Posted by: {{ request.owner.username }} on {{ request.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-dollar-sign fa-lg text-success"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">${{ "%.2f"|format(request.budget) }}</h4>
+                            <p class="text-muted small mb-0">Budget</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-end mb-4">
+                    <a href="{{ url_for('view_request', request_id=request.id) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Request
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card animate-on-scroll">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-list me-2 text-primary"></i>All Offers ({{ offers|length }})
+                </h4>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortOffersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-sort me-1"></i>Sort By
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortOffersDropdown">
+                        <li><a class="dropdown-item sort-offers" href="#" data-sort="price-asc">Price (Low to High)</a></li>
+                        <li><a class="dropdown-item sort-offers" href="#" data-sort="price-desc">Price (High to Low)</a></li>
+                        <li><a class="dropdown-item sort-offers" href="#" data-sort="date-newest">Date (Newest First)</a></li>
+                        <li><a class="dropdown-item sort-offers" href="#" data-sort="date-oldest">Date (Oldest First)</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" id="offers-container">
+                    {% for offer in offers %}
+                        <div class="list-group-item p-4 offer-item animate-on-scroll" 
+                             style="animation-delay: {{ loop.index0 * 0.1 }}s"
+                             data-price="{{ offer.price }}"
+                             data-date="{{ offer.created_at.isoformat() }}">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user fa-lg text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0">{{ offer.seller.username }}</h5>
+                                            <p class="text-muted small mb-0">{{ offer.created_at.strftime('%B %d, %Y at %H:%M') }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <h6 class="fw-bold mt-3 mb-2">Offer Preview:</h6>
+                                    <div class="p-3 bg-light rounded mb-3">
+                                        <p class="mb-0">{{ offer.description|truncate(150)|safe }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-dollar-sign fa-lg text-success"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="mb-0">${{ "%.2f"|format(offer.price) }}</h4>
+                                                    <p class="text-muted small mb-0">
+                                                        {% if offer.price < request.budget %}
+                                                            <span class="text-success"><i class="fas fa-arrow-down me-1"></i>${{ "%.2f"|format(request.budget - offer.price) }} under budget</span>
+                                                        {% elif offer.price > request.budget %}
+                                                            <span class="text-danger"><i class="fas fa-arrow-up me-1"></i>${{ "%.2f"|format(offer.price - request.budget) }} over budget</span>
+                                                        {% else %}
+                                                            <span class="text-muted">Matches budget exactly</span>
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-grid gap-2 mt-4">
+                                                <a href="{{ url_for('view_offer', offer_id=offer.id) }}" class="btn btn-primary btn-lg btn-pulse">
+                                                    <i class="fas fa-eye me-2"></i>View Full Offer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle sorting offers
+        const sortOfferLinks = document.querySelectorAll('.sort-offers');
+        sortOfferLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sortBy = this.getAttribute('data-sort');
+                const offersContainer = document.getElementById('offers-container');
+                const offerItems = Array.from(document.querySelectorAll('.offer-item'));
+                
+                if (sortBy === 'price-asc') {
+                    offerItems.sort((a, b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
+                } else if (sortBy === 'price-desc') {
+                    offerItems.sort((a, b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
+                } else if (sortBy === 'date-newest') {
+                    offerItems.sort((a, b) => new Date(b.dataset.date) - new Date(a.dataset.date));
+                } else if (sortBy === 'date-oldest') {
+                    offerItems.sort((a, b) => new Date(a.dataset.date) - new Date(a.dataset.date));
+                }
+                
+                offerItems.forEach(item => {
+                    offersContainer.appendChild(item);
+                });
+                
+                // Show notification
+                if (typeof showNotification === 'function') {
+                    showNotification('Offers sorted successfully', 'success');
+                }
+            });
+        });
+        
+        // Animation for elements
+        function animateElements() {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            
+            elements.forEach((element, index) => {
+                // Add a slight delay based on the element's position
+                const delay = index * 100;
+                
+                setTimeout(() => {
+                    element.classList.add('animated-element');
+                }, delay);
+            });
+        }
+        
+        // Run animations
+        animateElements();
+    });
+</script>
+
+<style>
+    /* Animation styles */
+    .animated-element {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Pulse animation for buttons */
+    .btn-pulse {
+        animation: pulse-animation 2s infinite;
+        box-shadow: 0 0 0 rgba(66, 133, 244, 0.4);
+    }
+    
+    @keyframes pulse-animation {
+        0% {
+            box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+        }
+    }
+    
+    /* Hover effects */
+    .offer-item {
+        transition: all 0.3s ease;
+    }
+    
+    .offer-item:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+</style>
+{% endblock %} 

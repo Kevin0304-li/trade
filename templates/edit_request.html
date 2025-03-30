@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Request - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('view_request', request_id=request.id) }}">Request Details</a></li>
+                <li class="breadcrumb-item active">Edit Request</li>
+            </ol>
+        </nav>
+        
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit me-2 text-primary"></i>Edit Request
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('edit_request', request_id=request.id) }}" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required
+                            value="{{ request.title }}" placeholder="E.g., 'Need a website design', 'Looking for a study plan'">
+                        <div class="form-text">Be specific and concise about what you need.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="company_name" class="form-label">Company Name (Optional)</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" 
+                            value="{{ request.company_name }}" placeholder="Enter your company or organization name">
+                        <div class="form-text">This helps sellers understand who they'll be working with.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="6" required
+                            placeholder="Describe what you need in detail. Be specific about your requirements, timeline, and any other relevant information.">{{ request.description }}</textarea>
+                        <div class="form-text">The more details you provide, the better offers you'll receive.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="budget" class="form-label">Budget ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-dollar-sign text-muted"></i>
+                            </span>
+                            <input type="number" class="form-control" id="budget" name="budget" step="0.01" min="1" required
+                                value="{{ '%.2f'|format(request.budget) }}" placeholder="Enter your maximum budget">
+                        </div>
+                        <div class="form-text">Set a reasonable budget to attract quality offers.</div>
+                    </div>
+                    
+                    {% if request.files %}
+                    <div class="mb-4">
+                        <label class="form-label">Current Files</label>
+                        <div class="row">
+                            {% for file in request.files.split(',') if file %}
+                                {% set filename = file.split('/')[-1] if '/' in file else file.split('\\')[-1] if '\\' in file else file %}
+                                {% set file_ext = filename.split('.')[-1].lower() %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body p-2 text-center">
+                                            <div class="mb-2">
+                                                {% if file_ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+                                                    <a href="{{ url_for('uploaded_file', filename=file) }}" target="_blank" class="d-block">
+                                                        <img src="{{ url_for('uploaded_file', filename=file) }}" alt="{{ filename }}" class="img-fluid rounded" style="max-height: 100px;">
+                                                    </a>
+                                                {% elif file_ext == 'pdf' %}
+                                                    <div class="document-icon mb-2">
+                                                        <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="document-icon mb-2">
+                                                        <i class="fas fa-file fa-3x text-secondary"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <p class="small text-truncate mb-1">{{ filename }}</p>
+                                            <div class="form-check mb-2 text-start">
+                                                <input class="form-check-input" type="checkbox" value="{{ file }}" name="delete_files" id="delete_{{ loop.index }}">
+                                                <label class="form-check-label" for="delete_{{ loop.index }}">
+                                                    Delete file
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <label for="files" class="form-label">Upload New Files (Optional)</label>
+                        <input type="file" class="form-control" id="files" name="files" multiple 
+                               accept=".pdf,.png,.jpg,.jpeg,.gif">
+                        <div class="form-text">
+                            Upload PDFs, images, or other relevant files. Maximum size: 16MB.
+                            <br>Accepted formats: PDF, PNG, JPG, JPEG, GIF.
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('view_request', request_id=request.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add confirmation for file deletion
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(e) {
+        const deleteCheckboxes = document.querySelectorAll('input[name="delete_files"]:checked');
+        
+        if (deleteCheckboxes.length > 0) {
+            if (!confirm('Are you sure you want to delete the selected files? This cannot be undone.')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

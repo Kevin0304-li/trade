@@ -1,0 +1,976 @@
+{% extends 'base.html' %}
+
+{% block title %}Make an Offer - Reverse Marketplace{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4 animate-on-scroll">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('view_request', request_id=request.id) }}">Request Details</a></li>
+        <li class="breadcrumb-item active">Make an Offer</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4 animate-on-scroll">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Make an Offer</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('make_offer', request_id=request.id) }}" id="offer-form">
+                    <div class="mb-4">
+                        <label for="price" class="form-label">Your Price ($)</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" min="1" required
+                                placeholder="Enter your price">
+                        </div>
+                        
+                        <!-- Budget visualization -->
+                        <div class="budget-comparison mt-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <div>
+                                    <span class="badge bg-primary">Your Offer: <span id="offer-price-display">$0.00</span></span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-secondary">Budget: ${{ "%.2f"|format(request.budget) }}</span>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar" id="price-progress" role="progressbar" style="width: 0%;" 
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="mt-2 mb-0" id="price-feedback"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Offer Description</label>
+                        <div class="description-editor mb-2">
+                            <div class="btn-toolbar mb-2" role="toolbar">
+                                <div class="btn-group me-2 format-buttons" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="bold">
+                                        <i class="fas fa-bold"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="italic">
+                                        <i class="fas fa-italic"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="underline">
+                                        <i class="fas fa-underline"></i>
+                                    </button>
+                                </div>
+                                <div class="btn-group me-2" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="bullet-list">
+                                        <i class="fas fa-list-ul"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="number-list">
+                                        <i class="fas fa-list-ol"></i>
+                                    </button>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="add-template">
+                                        <i class="fas fa-file-alt me-1"></i>Template
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea class="form-control" id="description" name="description" rows="8" required
+                                placeholder="Describe what you can provide, including quality, timeline, and any additional services."></textarea>
+                            <div class="char-counter text-end mt-1">
+                                <small class="text-muted"><span id="char-count">0</span> / 2000 characters</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms-check" required>
+                            <label class="form-check-label" for="terms-check">
+                                I agree to complete this work as described if my offer is accepted
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg submit-btn" id="submit-offer" disabled>
+                            <i class="fas fa-paper-plane me-2"></i><span>Submit Offer</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <div class="alert alert-info mb-0">
+                    <h5 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Tips for a successful offer:</h5>
+                    <ul class="mb-0">
+                        <li>Explain why you're the best person for this request</li>
+                        <li>Be clear about what you'll deliver and when</li>
+                        <li>Highlight your relevant experience or skills</li>
+                        <li>If offering below the buyer's budget, emphasize the value you provide</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4 animate-on-scroll">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Request Details</h5>
+            </div>
+            <div class="card-body">
+                <h5>{{ request.title }}</h5>
+                <div class="d-flex align-items-center mt-3 mb-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-dollar-sign fa-lg text-success"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">${{ "%.2f"|format(request.budget) }}</h4>
+                        <p class="text-muted small mb-0">Budget</p>
+                    </div>
+                </div>
+                <p><i class="fas fa-user me-2 text-primary"></i><strong>Posted by:</strong> {{ request.owner.username }}</p>
+                <p><i class="far fa-calendar-alt me-2 text-primary"></i><strong>Posted on:</strong> {{ request.created_at.strftime('%B %d, %Y') }}</p>
+                <hr>
+                <h6><i class="fas fa-align-left me-2 text-primary"></i>Description:</h6>
+                <div class="p-3 bg-light rounded description-box">
+                    {{ request.description|safe }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card animate-on-scroll">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Offer Checklist</h5>
+            </div>
+            <div class="card-body">
+                <div class="offer-checklist">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input checklist-item" type="checkbox" id="check-price">
+                        <label class="form-check-label" for="check-price">
+                            Set a competitive price
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input checklist-item" type="checkbox" id="check-description">
+                        <label class="form-check-label" for="check-description">
+                            Add detailed description (200+ characters)
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input checklist-item" type="checkbox" id="check-timeline">
+                        <label class="form-check-label" for="check-timeline">
+                            Include your timeline for completion
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input checklist-item" type="checkbox" id="check-experience">
+                        <label class="form-check-label" for="check-experience">
+                            Highlight relevant experience
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input checklist-item" type="checkbox" id="check-terms">
+                        <label class="form-check-label" for="check-terms">
+                            Agree to terms
+                        </label>
+                    </div>
+                </div>
+                <hr>
+                <div class="offer-strength mt-3">
+                    <h6 class="mb-2">Offer Strength</h6>
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div class="progress-bar bg-info" id="offer-strength-bar" role="progressbar" style="width: 0%;" 
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="text-muted small" id="offer-strength-text">Complete the checklist to improve your offer strength</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates Modal -->
+<div class="modal fade" id="templatesModal" tabindex="-1" aria-labelledby="templatesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="templatesModalLabel">Offer Templates</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="templateTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-templates" type="button" role="tab">General</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="services-tab" data-bs-toggle="tab" data-bs-target="#services-templates" type="button" role="tab">Services</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products-templates" type="button" role="tab">Products</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-templates" type="button" role="tab">Projects</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="consultation-tab" data-bs-toggle="tab" data-bs-target="#consultation-templates" type="button" role="tab">Consultation</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3" id="templateTabsContent">
+                    <!-- General Templates -->
+                    <div class="tab-pane fade show active" id="general-templates" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 template-item" data-template="professional">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Professional Offer</h5>
+                                        <p class="card-text">A straightforward, professional offer template.</p>
+                                        <ul class="small">
+                                            <li>Clean, professional structure</li>
+                                            <li>Clear timeline section</li>
+                                            <li>Highlights your key strengths</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 template-item" data-template="detailed">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Detailed Breakdown</h5>
+                                        <p class="card-text">A comprehensive, detailed offer with phases and deliverables.</p>
+                                        <ul class="small">
+                                            <li>Detailed approach explanation</li>
+                                            <li>Clear deliverables list</li>
+                                            <li>Phased timeline breakdown</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 template-item" data-template="value">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Value Proposition</h5>
+                                        <p class="card-text">Emphasizes the value and benefits of your offer.</p>
+                                        <ul class="small">
+                                            <li>Highlights your unique value</li>
+                                            <li>Emphasizes cost efficiency</li>
+                                            <li>Includes guarantees</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Services Templates -->
+                    <div class="tab-pane fade" id="services-templates" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 template-item" data-template="service">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Service Offer</h5>
+                                        <p class="card-text">A template for service-based offers with detailed service description.</p>
+                                        <ul class="small">
+                                            <li>Detailed service description</li>
+                                            <li>Qualifications highlight</li>
+                                            <li>Clear service process steps</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Products Templates -->
+                    <div class="tab-pane fade" id="products-templates" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 template-item" data-template="product">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Product Offer</h5>
+                                        <p class="card-text">A template for product-based offers with detailed specifications.</p>
+                                        <ul class="small">
+                                            <li>Detailed product specifications</li>
+                                            <li>Quality assurance information</li>
+                                            <li>Delivery and pricing details</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Templates -->
+                    <div class="tab-pane fade" id="projects-templates" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 template-item" data-template="project">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Project Proposal</h5>
+                                        <p class="card-text">A comprehensive project proposal template with milestones.</p>
+                                        <ul class="small">
+                                            <li>Project understanding section</li>
+                                            <li>Detailed milestones</li>
+                                            <li>Clear deliverables list</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Consultation Templates -->
+                    <div class="tab-pane fade" id="consultation-templates" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 template-item" data-template="consultation">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Consultation Offer</h5>
+                                        <p class="card-text">A template for consultation services with package details.</p>
+                                        <ul class="small">
+                                            <li>Consultation focus and expertise</li>
+                                            <li>Package details with sessions</li>
+                                            <li>Clear outcomes for the client</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Use This Template</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Template Preview Container -->
+                <div id="template-preview" class="mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const budgetAmount = {{ request.budget }};
+        const priceInput = document.getElementById('price');
+        const priceDisplay = document.getElementById('offer-price-display');
+        const priceProgress = document.getElementById('price-progress');
+        const priceFeedback = document.getElementById('price-feedback');
+        const descriptionInput = document.getElementById('description');
+        const charCount = document.getElementById('char-count');
+        const termsCheck = document.getElementById('terms-check');
+        const submitBtn = document.getElementById('submit-offer');
+        const offerForm = document.getElementById('offer-form');
+        const checkPrice = document.getElementById('check-price');
+        const checkDescription = document.getElementById('check-description');
+        const checkTimeline = document.getElementById('check-timeline');
+        const checkExperience = document.getElementById('check-experience');
+        const checkTerms = document.getElementById('check-terms');
+        const offerStrengthBar = document.getElementById('offer-strength-bar');
+        const offerStrengthText = document.getElementById('offer-strength-text');
+        
+        // Template definitions for different request types
+        const templates = {
+            'professional': `Thank you for posting your request. I'd like to offer my services to meet your needs.
+
+ABOUT ME:
+I have [X years/months] of experience in [relevant field/skill]. My background includes [brief relevant experience].
+
+MY OFFER:
+I will provide [detailed description of what you will deliver].
+
+TIMELINE:
+- Start: Upon acceptance of this offer
+- Completion: [Estimated completion date or timeframe]
+
+WHY CHOOSE ME:
+- [Key strength/benefit 1]
+- [Key strength/benefit 2]
+- [Key strength/benefit 3]
+
+I look forward to the opportunity to work with you. Please let me know if you have any questions.`,
+
+            'detailed': `Thank you for your consideration. Below is my detailed offer for your request.
+
+APPROACH:
+[Explain how you will approach this work]
+
+DELIVERABLES:
+1. [First deliverable]
+2. [Second deliverable]
+3. [Third deliverable]
+
+TIMELINE:
+- Phase 1: [Description] - [Timeframe]
+- Phase 2: [Description] - [Timeframe]
+- Phase 3: [Description] - [Timeframe]
+
+QUALIFICATIONS:
+- [Relevant qualification/experience 1]
+- [Relevant qualification/experience 2]
+- [Relevant qualification/experience 3]
+
+PROCESS:
+[Explain your working process, communication style, etc.]
+
+I'm committed to delivering high-quality work that meets your requirements. Please feel free to ask any questions.`,
+
+            'value': `I'm excited to submit my offer for your request. Here's how I can provide exceptional value:
+
+VALUE PROPOSITION:
+[Explain the unique value you offer compared to others]
+
+WHAT'S INCLUDED:
+- [Core service/product]
+- [Additional benefit 1]
+- [Additional benefit 2]
+- [Extra: Something others might charge extra for]
+
+COST EFFICIENCY:
+[Explain why your offer is cost-effective, especially if below budget]
+
+MY RELEVANT EXPERIENCE:
+[Brief description of similar projects/work you've done]
+
+GUARANTEE:
+[Any guarantees you're willing to offer, like satisfaction guarantee]
+
+I believe this offer provides excellent value for your budget. I look forward to discussing this opportunity with you.`,
+
+            // Service-specific template
+            'service': `Thank you for your service request. I'd like to offer the following:
+
+SERVICE DETAILS:
+- [Describe exactly what service you will provide]
+- [Include any specific methodologies or approaches]
+- [Mention any tools or equipment you'll use]
+
+QUALIFICATIONS:
+- [Your relevant qualifications/certifications]
+- [Years of experience in this specific service]
+- [Notable clients or projects, if applicable]
+
+SERVICE PROCESS:
+1. [First step]
+2. [Second step]
+3. [Third step]
+
+TIMING:
+- Service can begin: [Start date]
+- Estimated completion: [End date/timeframe]
+
+I aim to provide excellent service that meets all your requirements. Please let me know if you need any clarification.`,
+
+            // Product-specific template
+            'product': `I can provide the product you're looking for with the following specifications:
+
+PRODUCT SPECIFICATIONS:
+- Brand/Manufacturer: [Brand name]
+- Model: [Model number/name]
+- Specifications:
+  • [Key specification 1]
+  • [Key specification 2]
+  • [Key specification 3]
+
+QUALITY ASSURANCE:
+- [Quality standards met]
+- [Warranty information]
+- [Return policy]
+
+DELIVERY INFORMATION:
+- Estimated delivery time: [Timeframe]
+- Shipping method: [Method]
+- [Any installation or setup included]
+
+PRICING BREAKDOWN:
+- Product cost: [Cost]
+- Shipping: [Cost]
+- [Any additional costs]
+
+Please let me know if you have any questions about the product specifications or delivery details.`,
+
+            // Project-specific template
+            'project': `I'm excited to submit my proposal for your project:
+
+PROJECT UNDERSTANDING:
+[Brief summary showing you understand the project requirements]
+
+PROPOSED SOLUTION:
+[Overview of your approach to the project]
+
+PROJECT MILESTONES:
+1. [Milestone 1]: [Description] - [Timeline]
+2. [Milestone 2]: [Description] - [Timeline]
+3. [Milestone 3]: [Description] - [Timeline]
+
+DELIVERABLES:
+- [Deliverable 1]
+- [Deliverable 2]
+- [Deliverable 3]
+
+TECHNICAL APPROACH:
+[Description of technologies, methodologies, or frameworks you'll use]
+
+RELEVANT EXPERIENCE:
+[Brief description of similar projects you've completed]
+
+COMMUNICATION PLAN:
+[How and when you'll provide updates]
+
+I'm confident I can deliver this project to your specifications within the proposed timeline.`,
+
+            // Consultation-specific template
+            'consultation': `I'd like to offer my consultation services for your needs:
+
+CONSULTATION FOCUS:
+[Description of the specific expertise/advice you'll provide]
+
+MY QUALIFICATIONS:
+- [Relevant qualification 1]
+- [Relevant qualification 2]
+- [Years of experience in this field]
+
+CONSULTATION PACKAGE:
+- [Number] [length] consultation sessions
+- [Any assessment or analysis included]
+- [Any reports or documents delivered]
+- [Follow-up support details]
+
+YOUR OUTCOMES:
+- [Specific outcome 1]
+- [Specific outcome 2]
+- [Specific outcome 3]
+
+SCHEDULING:
+[How and when the consultations will be delivered]
+
+This consultation is designed to provide you with actionable insights and solutions for your specific needs.`
+        };
+        
+        // Budget visualization
+        priceInput.addEventListener('input', function() {
+            updatePriceVisualization();
+        });
+        
+        function updatePriceVisualization() {
+            const price = parseFloat(priceInput.value) || 0;
+            priceDisplay.textContent = '$' + price.toFixed(2);
+            
+            // Calculate percentage of budget
+            const percentOfBudget = (price / budgetAmount) * 100;
+            
+            // Update progress bar
+            priceProgress.style.width = Math.min(percentOfBudget, 200) + '%';
+            
+            // Set progress bar color based on price
+            if (price === 0) {
+                priceProgress.className = 'progress-bar';
+                priceFeedback.innerHTML = '';
+            } else if (price < budgetAmount * 0.8) {
+                priceProgress.className = 'progress-bar bg-success';
+                priceFeedback.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i>Your price is well under the buyer\'s budget, which may make your offer more attractive!</span>';
+                checkPrice.checked = true;
+            } else if (price <= budgetAmount) {
+                priceProgress.className = 'progress-bar bg-info';
+                priceFeedback.innerHTML = '<span class="text-info"><i class="fas fa-info-circle me-1"></i>Your price is within the buyer\'s budget.</span>';
+                checkPrice.checked = true;
+            } else if (price <= budgetAmount * 1.2) {
+                priceProgress.className = 'progress-bar bg-warning';
+                priceFeedback.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>Your price is slightly above the buyer\'s budget. Make sure to explain the added value.</span>';
+                checkPrice.checked = true;
+            } else {
+                priceProgress.className = 'progress-bar bg-danger';
+                priceFeedback.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Your price is significantly higher than the budget. You may want to reconsider or provide exceptional justification.</span>';
+                checkPrice.checked = false;
+            }
+            
+            updateOfferStrength();
+        }
+        
+        // Character counter
+        descriptionInput.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = length;
+            
+            if (length === 0) {
+                charCount.className = '';
+                checkDescription.checked = false;
+            } else if (length < 200) {
+                charCount.className = 'text-warning';
+                checkDescription.checked = false;
+            } else if (length <= 1800) {
+                charCount.className = 'text-success';
+                checkDescription.checked = true;
+            } else if (length <= 2000) {
+                charCount.className = 'text-warning';
+                checkDescription.checked = true;
+            } else {
+                charCount.className = 'text-danger';
+                this.value = this.value.substring(0, 2000);
+                charCount.textContent = 2000;
+                checkDescription.checked = true;
+            }
+            
+            // Check if description contains timeline-related words
+            const timelineWords = ['day', 'week', 'month', 'timeline', 'schedule', 'deadline', 'complete', 'deliver'];
+            checkTimeline.checked = timelineWords.some(word => this.value.toLowerCase().includes(word));
+            
+            // Check if description contains experience-related words
+            const experienceWords = ['experience', 'skill', 'expert', 'background', 'portfolio', 'worked', 'previous', 'year'];
+            checkExperience.checked = experienceWords.some(word => this.value.toLowerCase().includes(word));
+            
+            updateOfferStrength();
+        });
+        
+        // Terms checkbox
+        termsCheck.addEventListener('change', function() {
+            checkTerms.checked = this.checked;
+            updateSubmitButton();
+            updateOfferStrength();
+        });
+        
+        // Update submit button state
+        function updateSubmitButton() {
+            if (priceInput.value && descriptionInput.value.length >= 50 && termsCheck.checked) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+        
+        // Format buttons
+        const formatButtons = document.querySelectorAll('.format-btn');
+        formatButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const format = this.getAttribute('data-format');
+                const textarea = document.getElementById('description');
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const selectedText = textarea.value.substring(start, end);
+                let formattedText = '';
+                
+                switch(format) {
+                    case 'bold':
+                        formattedText = `**${selectedText}**`;
+                        break;
+                    case 'italic':
+                        formattedText = `*${selectedText}*`;
+                        break;
+                    case 'underline':
+                        formattedText = `_${selectedText}_`;
+                        break;
+                    case 'bullet-list':
+                        formattedText = selectedText.split('\n').map(line => `• ${line}`).join('\n');
+                        break;
+                    case 'number-list':
+                        formattedText = selectedText.split('\n').map((line, i) => `${i+1}. ${line}`).join('\n');
+                        break;
+                }
+                
+                textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+                textarea.focus();
+                textarea.selectionStart = start;
+                textarea.selectionEnd = start + formattedText.length;
+                
+                // Trigger input event to update character count
+                const event = new Event('input', { bubbles: true });
+                textarea.dispatchEvent(event);
+            });
+        });
+        
+        // Template button
+        const addTemplateBtn = document.getElementById('add-template');
+        addTemplateBtn.addEventListener('click', function() {
+            const templatesModal = new bootstrap.Modal(document.getElementById('templatesModal'));
+            templatesModal.show();
+        });
+        
+        // Function to update character count
+        function updateCharCount() {
+            const length = descriptionInput.value.length;
+            charCount.textContent = length;
+            
+            if (length === 0) {
+                charCount.className = '';
+                checkDescription.checked = false;
+            } else if (length < 200) {
+                charCount.className = 'text-warning';
+                checkDescription.checked = false;
+            } else if (length <= 1800) {
+                charCount.className = 'text-success';
+                checkDescription.checked = true;
+            } else if (length <= 2000) {
+                charCount.className = 'text-warning';
+                checkDescription.checked = true;
+            } else {
+                charCount.className = 'text-danger';
+                descriptionInput.value = descriptionInput.value.substring(0, 2000);
+                charCount.textContent = 2000;
+                checkDescription.checked = true;
+            }
+            
+            // Check if description contains timeline-related words
+            const timelineWords = ['day', 'week', 'month', 'timeline', 'schedule', 'deadline', 'complete', 'deliver'];
+            checkTimeline.checked = timelineWords.some(word => descriptionInput.value.toLowerCase().includes(word));
+            
+            // Check if description contains experience-related words
+            const experienceWords = ['experience', 'skill', 'expert', 'background', 'portfolio', 'worked', 'previous', 'year'];
+            checkExperience.checked = experienceWords.some(word => descriptionInput.value.toLowerCase().includes(word));
+            
+            updateOfferStrength();
+        }
+        
+        // Preview template on hover
+        const templateItems = document.querySelectorAll('.template-item');
+        const previewContainer = document.getElementById('template-preview');
+        
+        templateItems.forEach(item => {
+            // Handle template selection (click)
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const templateName = this.getAttribute('data-template');
+                if (templates[templateName]) {
+                    if (descriptionInput.value && !confirm('This will replace your current description. Continue?')) {
+                        return;
+                    }
+                    
+                    descriptionInput.value = templates[templateName];
+                    updateCharCount();
+                    
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('templatesModal'));
+                    modal.hide();
+                    
+                    // Show notification
+                    if (typeof showNotification === 'function') {
+                        showNotification('Template applied successfully', 'success');
+                    }
+                }
+            });
+            
+            // Show preview on hover
+            item.addEventListener('mouseenter', function() {
+                const templateName = this.getAttribute('data-template');
+                if (templates[templateName] && previewContainer) {
+                    // Get first 100 characters of template
+                    const previewText = templates[templateName].substring(0, 150) + '...';
+                    
+                    // Update preview
+                    previewContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <strong>Preview:</strong>
+                            <pre class="mb-0 mt-2 p-2 bg-light rounded small" style="max-height: 100px; overflow-y: auto;">${previewText}</pre>
+                        </div>
+                    `;
+                    previewContainer.classList.remove('d-none');
+                }
+            });
+            
+            // Hide preview when mouse leaves
+            item.addEventListener('mouseleave', function() {
+                if (previewContainer) {
+                    previewContainer.classList.add('d-none');
+                }
+            });
+        });
+        
+        // Form submission
+        offerForm.addEventListener('submit', function(e) {
+            // Show loading state
+            const submitButton = document.getElementById('submit-offer');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting...';
+        });
+        
+        // Function to update offer strength meter
+        function updateOfferStrength() {
+            // Count the number of checked items
+            const checkedItems = [
+                checkPrice.checked,
+                checkDescription.checked,
+                checkTimeline.checked,
+                checkExperience.checked,
+                checkTerms.checked
+            ].filter(Boolean).length;
+            
+            // Calculate percentage
+            const percentage = (checkedItems / 5) * 100;
+            offerStrengthBar.style.width = percentage + '%';
+            
+            // Update text and color based on strength
+            if (percentage === 0) {
+                offerStrengthBar.className = 'progress-bar';
+                offerStrengthText.textContent = 'Start creating your offer';
+                offerStrengthText.className = 'text-muted';
+            } else if (percentage <= 20) {
+                offerStrengthBar.className = 'progress-bar bg-danger';
+                offerStrengthText.textContent = 'Very Weak';
+                offerStrengthText.className = 'text-danger';
+            } else if (percentage <= 40) {
+                offerStrengthBar.className = 'progress-bar bg-warning';
+                offerStrengthText.textContent = 'Weak';
+                offerStrengthText.className = 'text-warning';
+            } else if (percentage <= 60) {
+                offerStrengthBar.className = 'progress-bar bg-info';
+                offerStrengthText.textContent = 'Average';
+                offerStrengthText.className = 'text-info';
+            } else if (percentage <= 80) {
+                offerStrengthBar.className = 'progress-bar bg-primary';
+                offerStrengthText.textContent = 'Strong';
+                offerStrengthText.className = 'text-primary';
+            } else {
+                offerStrengthBar.className = 'progress-bar bg-success';
+                offerStrengthText.textContent = 'Very Strong';
+                offerStrengthText.className = 'text-success';
+                
+                // Add animation if 100%
+                if (percentage === 100) {
+                    offerStrengthBar.classList.add('progress-bar-striped');
+                    offerStrengthBar.classList.add('progress-bar-animated');
+                } else {
+                    offerStrengthBar.classList.remove('progress-bar-striped');
+                    offerStrengthBar.classList.remove('progress-bar-animated');
+                }
+            }
+            
+            // Update submit button
+            updateSubmitButton();
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        
+        // Add description box hover effect
+        const descriptionBox = document.querySelector('.description-box');
+        if (descriptionBox) {
+            descriptionBox.addEventListener('mouseenter', function() {
+                this.classList.add('description-highlight');
+            });
+            
+            descriptionBox.addEventListener('mouseleave', function() {
+                this.classList.remove('description-highlight');
+            });
+        }
+        
+        // Initialize elements
+        updatePriceVisualization();
+        updateOfferStrength();
+        
+        // Show animated entrance for page elements
+        function animateElements() {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            
+            elements.forEach((element, index) => {
+                // Add a slight delay based on the element's position
+                const delay = index * 100;
+                
+                setTimeout(() => {
+                    element.classList.add('animated-element');
+                }, delay);
+            });
+        }
+        
+        // Trigger animations on page load
+        animateElements();
+        
+        // Show welcome tip
+        setTimeout(() => {
+            showNotification('Tip: Use the template button to quickly create a professional offer', 'info');
+        }, 1000);
+    });
+</script>
+
+<style>
+    /* Animation styles */
+    .animated-element {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Description box styles */
+    .description-box {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .description-highlight {
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    /* Format buttons hover */
+    .format-btn:hover {
+        background-color: #e9ecef;
+    }
+    
+    /* Checklist animation */
+    .checklist-item:checked + label {
+        text-decoration: none;
+        color: #28a745;
+        font-weight: 500;
+        animation: checkPulse 0.4s ease;
+    }
+    
+    @keyframes checkPulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    /* Price progress animation */
+    #price-progress {
+        transition: width 0.5s ease, background-color 0.5s ease;
+    }
+    
+    /* Submit button hover */
+    .submit-btn:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        transition: all 0.3s ease;
+    }
+    
+    /* Template items hover */
+    .template-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %} 
